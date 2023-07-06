@@ -3,12 +3,18 @@
 namespace app\controllers;
 
 use app\models\Movie;
+use Facebook\WebDriver\WebDriverExpectedCondition;
+use Facebook\WebDriver\WebDriverWait;
+use Symfony\Component\DomCrawler\Crawler;
 use thecodeholic\phpmvc\Application;
 use thecodeholic\phpmvc\Controller;
-use thecodeholic\phpmvc\middlewares\AuthMiddleware;
 use thecodeholic\phpmvc\Request;
 
 require_once __DIR__ . '/../vendor/autoload.php';
+
+use Facebook\WebDriver\Remote\DesiredCapabilities;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
 
 class MovieController extends Controller
 {
@@ -50,28 +56,16 @@ class MovieController extends Controller
         return $this->render('admin/movies/create');
     }
 
-    public function info(Request $request)
-    {
-        if ($request->getMethod() === 'post') {
-            $movieUrl = $_POST['movieUrl'];
-            $response = $this->getInfo($movieUrl);
-            echo json_encode($response);
-        }
-    }
-
     public function store(Request $request)
     {
         if ($request->getMethod() === 'post') {
             $movieUrl = $_POST['movieUrl'];
-            $info = $this->getInfo($movieUrl);
 
             $movie = new Movie();
-            $movie->title_fa = $info['title_fa'];
-            $movie->title_en = $info['title_en'];
+            $movie->title_fa = $_POST['titleFaInput'];
             $movie->user_id = 1;
             $movie->movie_url = $movieUrl;
-            $movie->description_fa = $info['description_fa'];
-            $movie->description_en = $info['description_en'];
+            $movie->description_fa = $_POST['descriptionFaInput'];
             if ($movie->save()) {
                 Application::$app->response->redirect('/admin/movies');
                 return;
@@ -124,7 +118,61 @@ class MovieController extends Controller
         }
     }
 
-            private function getInfo($movieUrl)
+
+    public function infofromhtml(Request $request)
+    {
+        if ($request->getMethod() === 'post') {
+            $movieUrl = $_POST['movieUrl'];
+            $response = $this->getInfoFromHtml($movieUrl);
+            echo json_encode($response);
+        }
+    }
+
+    public function infofromapi(Request $request)
+    {
+        if ($request->getMethod() === 'post') {
+            $movieUrl = $_POST['movieUrl'];
+            $response = $this->getInfoFromApi($movieUrl);
+            echo json_encode($response);
+        }
+    }
+
+    private function getInfoFromHtml($movieUrl)
+    {
+        $host = 'http://localhost:4444/wd/hub'; // Selenium server address
+
+        $capabilities = DesiredCapabilities::chrome();
+        $driver = RemoteWebDriver::create($host, $capabilities);
+
+        $driver->get($movieUrl);
+        $wait = new WebDriverWait($driver, 10);
+        $wait->until(
+            WebDriverExpectedCondition::visibilityOfElementLocated(WebDriverBy::className('styles__Description-sc-1d4ix3x-15'))
+        );
+        $pageContent = $driver->getPageSource();
+        $driver->quit();
+
+        $html = $pageContent;
+        $crawler = new Crawler($html);
+
+        // title
+        $h1Tag = $crawler->filter('h1.styles__Title-sc-1d4ix3x-11.ijfgBi');
+        $h1TagValue = $h1Tag->text();
+        $titleFa = str_replace('null', '', $h1TagValue);
+
+        // description
+        $divTag = $crawler->filter('div.styles__Description-sc-1d4ix3x-15.itgZub');
+        $divTagValue = $divTag->text();
+        $descriptionFa = str_replace('null', '', $divTagValue);
+
+        $response = array();
+        $response['title_fa'] = $titleFa;
+        $response['description_fa'] = $descriptionFa;
+
+        return $response;
+    }
+
+    private function getInfoFromApi($movieUrl)
     {
         $path = parse_url($movieUrl, PHP_URL_PATH);
         $movieNumber = basename($path);

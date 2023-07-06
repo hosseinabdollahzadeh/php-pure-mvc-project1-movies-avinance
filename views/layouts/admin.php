@@ -29,7 +29,7 @@
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion pr-0" id="accordionSidebar">
 
         <!-- Sidebar - Brand -->
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/admin">
             <div class="sidebar-brand-icon rotate-n-15">
                 <i class="fas fa-laugh-wink"></i>
             </div>
@@ -169,10 +169,12 @@
             },
             dataType: "json",
             success: function (response) {
-                $("#title_fa").val(response.title_fa);
-                $("#title_en").val(response.title_en);
-                $("#description_fa").text(response.description_fa);
-                $("#description_en").text(response.description_en);
+                $("#titleFa").val(response.title_fa);
+                $("#titleFaInput").val(response.title_fa);
+                $("#titleEn").val(response.title_en);
+                $("#descriptionFa").text(response.description_fa);
+                $("#descriptionFaInput").text(response.description_fa);
+                $("#descriptionEn").text(response.description_en);
                 console.log(response);
             }
         });

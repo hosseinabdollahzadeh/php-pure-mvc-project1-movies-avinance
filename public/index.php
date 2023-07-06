@@ -49,7 +49,7 @@ $app->router->get('/admin/movies/create', [MovieController::class, 'create']);
 $app->router->get('/admin/movies/edit/{id}', [MovieController::class, 'edit']);
 $app->router->post('/admin/movies/update/{id}', [MovieController::class, 'update']);
 $app->router->post('/admin/movies/delete/{id}', [MovieController::class, 'delete']);
-$app->router->post('/admin/movies/info', [MovieController::class, 'info']);
+$app->router->post('/admin/movies/info', [MovieController::class, 'infofromhtml']);
 $app->router->post('/admin/movies/store', [MovieController::class, 'store']);
 
 $app->run();
