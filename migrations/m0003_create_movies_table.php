@@ -22,7 +22,7 @@ class m0003_create_movies_table
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 
                 FOREIGN KEY (user_id) REFERENCES users(id)
-            )  ENGINE=INNODB;";
+            )  ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
         $db->pdo->exec($SQL);
     }
 
